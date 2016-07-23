@@ -3,28 +3,27 @@ package main
 import (
 	"github.com/go-martini/martini"
 	_ "github.com/go-sql-driver/mysql"
-	//"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm"
 	//"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
     "net/http"
 )
 
-/*var (
+var (
 	//db            gorm.DB
 	sqlConnection string
-)*/
+)
 
-type Item struct {
-	Id          int64  `form:"id"`
-	Title       string `form:"title"`
-	Description string `form:"description"`
-	UserName    string `form:"user_name"`
+type User struct {
+	User_id          int64  `form:"user_id"`
+	Username       string `form:"username"`
+	Password string `form:"password"`
 }
 
 func main() {
 	//var err error
 
-	/*sqlConnection = "root:NexeR2995!!@/ad1_t1"
+	sqlConnection = "root:NexeR2995!!@/ad1_t1"
 
 	db, err := gorm.Open("mysql", sqlConnection)
 
@@ -32,19 +31,27 @@ func main() {
 		panic(err)
 		return
 	}
-    */
+    
 	m := martini.Classic()
 
 	m.Use(render.Renderer())
 	m.Get("/", func(r render.Render) {
-		/*var retData struct {
-			Items []Item
-		}
-
-		db.Find(&retData.Items)
-        */
 		r.HTML(http.StatusOK, "index", nil)
 	})
+
+    m.Get("/users", func(r render.Render) {
+		var retData struct {
+			Users []User
+		}
+
+		db.Find(&retData.Users)
+        
+		r.JSON(http.StatusOK, retData)
+	})
+
+    m.Get("/**", func(r render.Render) {
+        r.Redirect("/")
+    })
 
     /*
 	m.Get("/item/add", func(r render.Render) {
