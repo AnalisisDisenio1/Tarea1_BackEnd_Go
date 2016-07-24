@@ -5,6 +5,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	//"github.com/martini-contrib/binding"
+	"fmt"
 	"github.com/martini-contrib/render"
 	"net/http"
 )
@@ -49,19 +50,19 @@ func main() {
 		r.JSON(http.StatusOK, retData)
 	})
 
-	m.Get("/**", func(r render.Render) {
-		r.Redirect("/")
-	})
-
 	m.Get("/user/:id", func(r render.Render, p martini.Params) {
 		var retData struct {
 			user User
 		}
 		db.Where("user_id = ?", p["id"]).Find(&retData.user)
+		fmt.Println(retData)
 
-		r.JSON(http.StatusOK, retData)
+		r.JSON(http.StatusOK, retData.user)
 	})
 
+	m.Get("/**", func(r render.Render) {
+		r.Redirect("/")
+	})
 	/*
 		m.Get("/item/add", func(r render.Render) {
 			var retData struct {
