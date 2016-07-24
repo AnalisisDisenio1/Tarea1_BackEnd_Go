@@ -4,13 +4,12 @@ import (
 	"github.com/go-martini/martini"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	//"github.com/martini-contrib/binding"
+	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
 	"net/http"
 )
 
 var (
-	//db            gorm.DB
 	sqlConnection string
 )
 
@@ -21,7 +20,6 @@ type User struct {
 }
 
 func main() {
-	//var err error
 
 	sqlConnection = "root:pass123@/ad1_t1"
 
@@ -54,7 +52,6 @@ func main() {
 			user User
 		}
 		db.Where("user_id = ?", p["id"]).Find(&retData.user)
-		fmt.Println(retData)
 
 		r.JSON(http.StatusOK, retData.user)
 	})
@@ -62,6 +59,11 @@ func main() {
 	m.Get("/user/remove/:id", func(r render.Render, p martini.Params) {
 		var user User
 		db.Where("user_id = ?", p["id"]).Delete(&user)
+		r.Redirect("/")
+	})
+
+	m.Post("/user/save", binding.Bind(User{}), func(r render.Render, u User) {
+		db.Save(&u)
 		r.Redirect("/")
 	})
 
