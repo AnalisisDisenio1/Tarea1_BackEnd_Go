@@ -60,6 +60,12 @@ func main() {
 		r.JSON(http.StatusOK, retData.user)
 	})
 
+	m.Get("/user/remove/:id", func(r render.Render, p martini.Params) {
+		var user User
+		db.Where("user_id = ?", p["id"]).Delete(&user)
+		r.Redirect("/")
+	})
+
 	m.Get("/**", func(r render.Render) {
 		r.Redirect("/")
 	})
