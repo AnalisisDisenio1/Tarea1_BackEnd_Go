@@ -23,7 +23,7 @@ type User struct {
 func main() {
 	//var err error
 
-	sqlConnection = "root:NexeR2995!!@/ad1_t1"
+	sqlConnection = "root:pass123!!@/ad1_t1"
 
 	db, err := gorm.Open("mysql", sqlConnection)
 
