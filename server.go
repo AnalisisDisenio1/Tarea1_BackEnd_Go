@@ -49,14 +49,14 @@ func main() {
 		r.JSON(http.StatusOK, retData)
 	})
 
-    m.Get("/**", func(r render.Render) {
-        r.Redirect("/")
-    })
-
 	m.Post("/user/save", binding.Bind(User{}), func(r render.Render, u User) {
 		db.Save(&u)
 		r.Redirect("/")
 	})
+
+    m.Get("/**", func(r render.Render) {
+        r.Redirect("/")
+    })
 
 	m.Run()
 }
