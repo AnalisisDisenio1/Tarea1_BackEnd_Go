@@ -7,6 +7,8 @@ import (
 	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
 	"net/http"
+	"github.com/martini-contrib/cors"
+	//"fmt"
 )
 
 var (
@@ -21,7 +23,7 @@ type User struct {
 
 func main() {
 
-	sqlConnection = "root:pass123@/ad1_t1"
+	sqlConnection = "root:NexeR2995!!@/ad1_t1"
 
 	db, err := gorm.Open("mysql", sqlConnection)
 
@@ -32,22 +34,30 @@ func main() {
 
 	m := martini.Classic()
 
-	m.Use(render.Renderer())
-	m.Get("/", func(r render.Render) {
-		r.HTML(http.StatusOK, "index", nil)
-	})
+	allowCORSHandler := (cors.Allow(&cors.Options{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
-	m.Get("/users", func(r render.Render) {
+	m.Use(render.Renderer())
+	m.Get("/", allowCORSHandler,  func(r render.Render) {
+		r.HTML(http.StatusOK, "index", nil)
+		})
+
+	m.Get("/users", allowCORSHandler, func(r render.Render) {
 		var retData struct {
 			Users []User
 		}
 
 		db.Find(&retData.Users)
 
-		r.JSON(http.StatusOK, retData)
+		r.JSON(200, retData.Users)
 	})
 
-	m.Get("/user/:id", func(r render.Render, p martini.Params) {
+	m.Get("/user/:id", allowCORSHandler, func(r render.Render, p martini.Params) {
 		var retData struct {
 			user User
 		}
@@ -56,19 +66,24 @@ func main() {
 		r.JSON(http.StatusOK, retData.user)
 	})
 
-	m.Get("/user/remove/:id", func(r render.Render, p martini.Params) {
+	m.Get("/user/remove/:id", allowCORSHandler, func(r render.Render, p martini.Params) {
 		var user User
 		db.Where("user_id = ?", p["id"]).Delete(&user)
-		r.Redirect("/")
+		r.JSON(http.StatusOK, "User deleted")
 	})
 
-	m.Post("/user/save", binding.Bind(User{}), func(r render.Render, u User) {
+	m.Post("/user/save", allowCORSHandler, binding.Bind(User{}), func(r render.Render, u User) {
 		db.Save(&u)
-		r.Redirect("/")
+		r.JSON(http.StatusOK, "User created")
 	})
 
 	m.Get("/**", func(r render.Render) {
 		r.Redirect("/")
+	})
+	
+	m.Post("/user/edit", allowCORSHandler, binding.Bind(User{}), func(r render.Render, u User){
+		db.Where("user_id = ?", u.User_id).Model(&u).Updates(User{Username: u.Username, Password: u.Password})
+		r.JSON(http.StatusOK, "User edited")
 	})
 
 	m.Run()
